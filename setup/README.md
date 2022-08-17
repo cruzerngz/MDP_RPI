@@ -12,18 +12,17 @@ The following advanced options are used:
 |-----------------|-------------------------------|
 | OS              | Pi OS lite 32-bit             |
 | SSH             | enabled, pub key auth         |
-| Authorized key  | *your public key*             |
+| Authorized key  | **your public key**           |
 | Hostname        | mdp12                         |
 | Username        | pi3                           |
 | Password        | mdp                           |
-| Wireless LAN    | *SSID visible to RPi on boot* |
-| WLAN passoword  | *your network password*       |
+| Wireless LAN    | **off. set locale on boot**   |
+<!-- | WLAN passoword  | *your network password*       | -->
 | Time zone       | Asia/Singapore                |
 | Keyboard layout | US                            |
 
-Wireless networking using wpa_supplicant is temporary.
-It will be disabled once the wifi hotspot is enabled.
-SSH authenticaion will change to key-based once initial setup is complete and all public keys are added to the Pi.
+Networking to the Pi is done through a usb tether.
+SSH authenticaion is key-based only.
 
 Once the image is flashed, install into the Pi and reboot.
 The Pi should boot and connect automatically to the SSID specified.

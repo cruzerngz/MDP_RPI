@@ -2,16 +2,18 @@
 # This script installs all prerequisites/dependencies
 # (as specified in the RPi technical materials)
 
-source functions.sh ## some helpers
-source echo_colours.sh
+SCRIPT_PATH=$(cd $(dirname $0); pwd)
+
+source $SCRIPT_PATH/functions.sh ## some helpers
+source $SCRIPT_PATH/echo_colours.sh
 
 set -e
 
 WLAN_IP="192.168.12"
 
-echo_red "disabling wpa_supplicant"
-sudo systemctl disable wpa_supplicant
-sudo service wpa_supplicant stop
+# echo_red "disabling wpa_supplicant"
+# sudo systemctl disable wpa_supplicant
+# sudo service wpa_supplicant stop
 
 echo_green "performing raspi-configs"
 sudo raspi-config nonint do_boot_behaviour B2
@@ -65,21 +67,6 @@ HOSTAPD_CONF=(
     "wmm_enabled=1"
 )
 
-# HOSTAPD_CONF="interface=wlan0\n\
-# driver=nl80211\n\
-# ssid=MDPGrp12\n\
-# wpa_passphrase=mdp\n\
-# mw_mode=g\n\
-# channel=0\n\
-# macaddr_acl=0\n\
-# auth_algs=1\n\
-# ignore_broadcast_ssid=0\n\
-# wpa=2\n\
-# wpa_key_mgmt=WPA_PSK\n\
-# rsn_pairwise=CCMP\n\
-# ieee80211n=1\n\
-# wmm_enabled=1\n"
-
 HOSTAPD_DAEMON_LINE='DAEMON_CONF="/etc/hostapd/hostapd.conf"'
 
 echo_green "configuring hostapd"
@@ -93,11 +80,11 @@ sudo mv /tmp/hostapd.conf /etc/hostapd/hostapd.conf
 
 append_if_missing $HOSTAPD_DAEMON_LINE /etc/default/hostapd
 
-echo_green "enabling hostapd"
-sudo /usr/sbin/hostapd /etc/hostapd/hostapd.conf
-sudo systemctl unmask hostapd
-sudo systemctl enable hostapd
-sudo systemctl start hostapd
+# echo_green "enabling hostapd"
+# sudo /usr/sbin/hostapd /etc/hostapd/hostapd.conf
+# sudo systemctl unmask hostapd
+# sudo systemctl enable hostapd
+# sudo systemctl start hostapd
 
 echo_green "setting up wlan0"
 # WLAN_CONF="interface wlan0\n\
@@ -118,14 +105,14 @@ DHCP_SUBNET_MASK="255.255.255.0"
 # sudo append_if_missing $DHCP_CONF /etc/dnsmasq.conf
 append_if_missing "interface=wlan0" /etc/dnsmasq.conf
 append_if_missing "dhcp-range=$DHCP_START,$DHCP_END,$DHCP_SUBNET_MASK,24H" /etc/dnsmasq.conf
-sudo systemctl start dnsmasq
+# sudo systemctl start dnsmasq
 
 echo_green "setting up eth0 IP forwarding"
 sudo sh -c "echo 1 > /proc/sys/net/ipv4/ip_forward"
 remove_partial_matching_line "net.ipv4.ip_forward" /etc/sysctl.conf
 append_if_missing "net.ipv4.ip_forward=1" /etc/sysctl.conf
 
-echo_green "setting up NAT"
+echo_green "setting up NAT" ## requires a reboot here
 sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
 sudo iptables -A FORWARD -i eth0 -o wlan0 -m state --state RELATED,ESTABLISHED -j ACCEPT
 sudo iptables -A FORWARD -i wlan0 -o eth0 -j ACCEPT
@@ -135,17 +122,16 @@ sudo netfilter-persistent save
 echo_green "setting up bluetooth"
 append_if_missing "PRETTY_HOSTNAME=MDP-TEAM-12" /etc/machine-info
 
-sudo systemctl daemon-reload
-sudo service bluetooth restart
 
 # automoate bluetooth conn
 remove_partial_matching_line "exit 0" /etc/rc.local
 append_if_missing "sudo rfcomm watch hci0" /etc/rc.local
 append_if_missing "exit 0" /etc/rc.local
 
+echo_green "setting up SSH tunneling"
+append_if_missing "export http_proxy=http://127.0.0.1:3129" /etc/environment
+append_if_missing "export https_proxy=http://127.0.0.1:3129" /etc/environment
+source /etc/environment
 
-echo_green "starting services"
-sudo service hostapd start
-sudo service bluetooth start
-
-echo_green "done"
+echo_bold_green "done"
+echo_bold_green "perform a reboot and continue with install_config-2.sh through a tethered connection."
