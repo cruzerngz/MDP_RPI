@@ -10,7 +10,7 @@ The following advanced options are used:
 
 | Setting         | Value                         |
 |-----------------|-------------------------------|
-| OS              | Pi OS 64-bit                  |
+| OS              | Pi OS lite 32-bit             |
 | SSH             | enabled, pub key auth         |
 | Authorized key  | *your public key*             |
 | Hostname        | mdp12                         |
@@ -21,6 +21,8 @@ The following advanced options are used:
 | Time zone       | Asia/Singapore                |
 | Keyboard layout | US                            |
 
+Wireless networking using wpa_supplicant is temporary.
+It will be disabled once the wifi hotspot is enabled.
 SSH authenticaion will change to key-based once initial setup is complete and all public keys are added to the Pi.
 
 Once the image is flashed, install into the Pi and reboot.
@@ -37,6 +39,8 @@ After first boot, clone this repo by running:
 Scripts are found in `$REPOPATH/setup`
 
 ## Install dependencies
+Run `sudo bash install.sh` to install and configure the rest of the settings.
+
 Some configuration files need to be edited manually.
 
 In `/etc/systemd/system/dbus-org.bluez.service`:
@@ -51,5 +55,5 @@ default-agent
 exit
 ```
 
-Run `sudo bash install.sh` to install and configure the rest of the settings.
+
 

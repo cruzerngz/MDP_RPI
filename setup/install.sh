@@ -9,6 +9,10 @@ set -e
 
 WLAN_IP="192.168.12"
 
+echo_red "disabling wpa_supplicant"
+sudo systemctl disable wpa_supplicant
+sudo service wpa_supplicant stop
+
 echo_green "performing raspi-configs"
 sudo raspi-config nonint do_boot_behaviour B2
 # sudo raspi-config nonint get_camera
@@ -21,6 +25,9 @@ sudo sed -i "s/start_x=0/start_x=1/g" /boot/config.txt
 
 echo_green "Setting timezone"
 sudo timedatectl set-timezone Asia/Singapore
+
+echo_green "Purging unnecessary packages"
+sudo apt purge wolfram-engine libreoffice*
 
 echo_green "updating system packages..."
 sudo apt update
@@ -47,7 +54,7 @@ HOSTAPD_CONF=(
     "ssid=MDPGrp12"
     "wpa_passphrase=2022mdp12"
     "hw_mode=g"
-    "channel=0"
+    "channel=11" # channel 0 causes issues with auto channel selection, do not use!
     "macaddr_acl=0"
     "auth_algs=1"
     "ignore_broadcast_ssid=0"
@@ -97,7 +104,7 @@ echo_green "setting up wlan0"
 # static ip_address=$WLAN_IP.1\24\n\
 # nohook wpa_supplicant"
 # sudo append_if_missing $WLAN_CONF /etc/dhcpcd.conf
-append_if_missing "interface wlan0" /etc/dhcpcd.conf
+append_if_missing "interface=wlan0" /etc/dhcpcd.conf
 append_if_missing "static ip_address=$WLAN_IP.1\24" /etc/dhcpcd.conf
 append_if_missing "nohook wpa_supplicant" /etc/dhcpcd.conf
 
@@ -109,7 +116,7 @@ DHCP_SUBNET_MASK="255.255.255.0"
 # DHCP_CONF="interface=wlan0\n\
 # dhcp-range=$DHCP_START,$DHCP_END,$DHCP_SUBNET_MASK,24H"
 # sudo append_if_missing $DHCP_CONF /etc/dnsmasq.conf
-append_if_missing "interface wlan0" /etc/dnsmasq.conf
+append_if_missing "interface=wlan0" /etc/dnsmasq.conf
 append_if_missing "dhcp-range=$DHCP_START,$DHCP_END,$DHCP_SUBNET_MASK,24H" /etc/dnsmasq.conf
 sudo systemctl start dnsmasq
 
