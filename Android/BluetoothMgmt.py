@@ -69,7 +69,7 @@ class BluetoothMgmt(multiprocessing.Process):
             if(self.handle_q.qsize() != 0):
                 packet, recv_from = self.handle_q.get()
                 packet = packet.rstrip()
-                self.send(f'{recv_from}:{packet}')
+                self.send(f'{packet}')
                 self.handle_q.task_done()
                 print("[LOG][AND]",
                       f'Done Handling Packet from "{recv_from}" ,content: "{packet}"')

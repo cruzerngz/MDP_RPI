@@ -48,13 +48,13 @@ class CameraMgmt(multiprocessing.Process):
             if message == 'DONE':
                 imageDetails = self.process_image(image, 'DONE')
                 print("[LOG][IMG]:",
-                  f'Yolov5 terminated! collage generated on Mac. Response: {imageDetails}')
+                      f'Yolov5 terminated! collage generated on Mac. Response: {imageDetails}')
                 return
             rpiName = socket.gethostname()
             imageDetails = self.process_image(image, rpiName)
             print("[LOG][IMG]:",
-                  f'Processing successfull. Image Details: {imageDetails}')
-            self.read(imageDetails)
+                  f'Processing successfull. Message: {message}, Image Details: {imageDetails}')
+            self.read(f'{message}:{str(imageDetails)}')
 
         except:
             print("[ERR][IMG]:", f'Image recognition failed! Terminating camera...')
@@ -83,7 +83,8 @@ class CameraMgmt(multiprocessing.Process):
 
     def process_image(self, image, rpiName):
         print("[LOG][IMG]:", 'Sending for processing')
-        imageDetails = self.image_sender.send_image(rpiName, image).decode('UTF-8')
+        imageDetails = self.image_sender.send_image(
+            rpiName, image).decode('UTF-8')
         return imageDetails
 
     def run(self):
@@ -93,7 +94,7 @@ class CameraMgmt(multiprocessing.Process):
         self.camera.resolution = (CAMERA_RESOLUTION_X, CAMERA_RESOLUTION_Y)
         time.sleep(2)
         print("[LOG][IMG]:", 'PiCamera is ready. Waiting for command to take photo')
-        
+
         print("[LOG][IMG]:", 'Trying to connect to image processing server')
         self.image_sender = imagezmq.ImageSender(
             connect_to=CAMERA_PROCESSING_ADDRESS)
