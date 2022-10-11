@@ -21,6 +21,7 @@ class RCMgmt(multiprocessing.Process):
         self.serial_port.port = CAR_PORT
         self.serial_port.timeout = CAR_TIMEOUT
         self.daemon = True
+        self.wait_resp = False
 
         self.start()
 
@@ -63,7 +64,11 @@ class RCMgmt(multiprocessing.Process):
         if self.serial_port.isOpen():
             message = message.rstrip()
             for c in message:
+                self.wait_resp = True
                 self.serial_port.write(c.encode('utf-8'))
+                while self.wait_resp:
+                    time.sleep(0.001)
+
             print("[LOG][STM]:", f'Sending "{message}" to RC-Car')
         else:
             print("[ERR][STM]:", "Writing failed! Serial port not open")
@@ -75,6 +80,7 @@ class RCMgmt(multiprocessing.Process):
 
                 if len(data) == 0:
                     continue
+                self.wait_resp = False
                 data = data.decode('utf-8')
                 print("[LOG][STM]:",
                       f'Receiving raw data from RC-Car: {data}')

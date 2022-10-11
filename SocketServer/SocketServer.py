@@ -1,4 +1,3 @@
-from audioop import add
 import socket
 import threading
 import time
@@ -45,7 +44,7 @@ class SocketServerMgmt(multiprocessing.Process):
     def recv(self, addr):
         while True:
             try:
-                if addr not in self.client:
+                if addr not in self.client or not self.client[addr]:
                     print(
                         f"[ERR][{self.header}]: Client {addr} Not Exist.")
                     break
@@ -74,6 +73,8 @@ class SocketServerMgmt(multiprocessing.Process):
         else:
             inactive = []
             for addr in self.client:
+                if not self.client[addr]:
+                    continue
                 try:
                     self.client[addr].send((message).encode('utf-8'))
                     print(f"[LOG][{self.header}]:", f'Sending {message} to {addr} successful!')
@@ -96,8 +97,8 @@ class SocketServerMgmt(multiprocessing.Process):
     def close_one_connection(self, addr):
         try:
             self.client[addr].close()
-            del self.client[addr]
-            del self.threads[addr]
+            self.client[addr] = None
+            self.threads[addr] = None
             
             print(f"[LOG][{self.header}]:",
                   f'Close client socket with address "{addr}" successful.')
