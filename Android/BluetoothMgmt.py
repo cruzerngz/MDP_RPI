@@ -29,6 +29,7 @@ class BluetoothMgmt(multiprocessing.Process):
 
                 print("[LOG][AND]", f"Received from Android: {packet}")
                 self.job_q.put(f'{self.header}:{packet}\n')
+                self.job_q.put(f'{self.header}:ALG:{packet}')
 
             except Exception as e:
                 print("[ERR][AND]:",

@@ -11,7 +11,7 @@ class TerminalMgmt:
             message = input("enter message: ")
             if message == 'exit':
                 break
-            self.push_to_q(f'USR:AND:{message}')
+            self.push_to_q(f'AND:ALG:{message}')
 
     def io_car(self):
         print("IN CAR :: write 'exit' to go back to main menu.")

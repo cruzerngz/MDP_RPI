@@ -50,8 +50,7 @@ class CameraMgmt(multiprocessing.Process):
                 print("[LOG][IMG]:",
                       f'Yolov5 terminated! collage generated on Mac. Response: {imageDetails}')
                 return
-            rpiName = socket.gethostname()
-            imageDetails = self.process_image(image, rpiName)
+            imageDetails = self.process_image(image, message)
             print("[LOG][IMG]:",
                   f'Processing successfull. Message: {message}, Image Details: {imageDetails}')
             self.read(f'{message}:{str(imageDetails)}')
